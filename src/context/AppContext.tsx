@@ -45,7 +45,7 @@ const initialState: AppState = {
   isUsersLoading: false,
   isPostsLoading: false,
   error: null,
-  postsPerPage: 10,
+  postsPerPage: 5,
   currentPage: 1,
   theme: 'system',
   isMenuOpen: false,

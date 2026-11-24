@@ -1,12 +1,22 @@
-import { useMemo } from 'react';
+import { useMemo, Fragment, useState } from 'react';
 import { useAppState, useAppDispatch } from '../context/AppContext';
 import { useUsers } from '../hooks/useUsers';
+import { usePosts } from '../hooks/usePosts';
+import Posts from './Posts';
+import CreatePostForm from './CreatePostForm';
 import type { User } from '../types/user';
 
-const UserList = () => {
-  const { users, searchQuery, isUsersLoading, error } = useAppState();
+interface UserListProps {
+  /** Whether we're in mobile inline detail mode */
+  isMobileInline?: boolean;
+}
+
+const UserList = ({ isMobileInline = false }: UserListProps) => {
+  const { users, searchQuery, isUsersLoading, error, selectedUser } = useAppState();
   const dispatch = useAppDispatch();
+  const [expandedUserId, setExpandedUserId] = useState<number | null>(null);
   useUsers();
+  usePosts();
 
   const filteredUsers = useMemo(() => {
     if (!searchQuery.trim()) return users;
@@ -23,9 +33,18 @@ const UserList = () => {
     dispatch({ type: 'SET_SEARCH_QUERY', payload: e.target.value });
   };
 
-  const handleUserSelect = (user: User) => {
-    dispatch({ type: 'SET_SELECTED_USER', payload: user });
+  const handleUserClick = (user: User) => {
+    // If same user clicked, toggle expanded state
+    if (expandedUserId === user.id) {
+      setExpandedUserId(null);
+      dispatch({ type: 'SET_SELECTED_USER', payload: null });
+    } else {
+      setExpandedUserId(user.id);
+      dispatch({ type: 'SET_SELECTED_USER', payload: user });
+    }
   };
+
+  const isExpanded = (userId: number) => expandedUserId === userId;
 
   if (isUsersLoading) {
     return (
@@ -59,6 +78,56 @@ const UserList = () => {
       </div>
     );
   }
+
+  const renderUserItem = (user: User) => {
+    const expanded = isExpanded(user.id);
+    return (
+      <Fragment key={user.id}>
+        <li>
+          <button
+            onClick={() => handleUserClick(user)}
+            className={`w-full px-4 py-3.5 text-left transition-all duration-150 group active:bg-gray-100 dark:active:bg-gray-800 ${
+              selectedUser?.id === user.id
+                ? 'bg-primary/5 dark:bg-primary/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset'
+                : 'hover:bg-gray-50 dark:hover:bg-gray-800/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset'
+            }`}
+            aria-expanded={expanded}
+            aria-controls={`user-detail-${user.id}`}
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 dark:from-primary/30 dark:to-primary/10 flex items-center justify-center text-primary font-semibold group-hover:from-primary/30 group-hover:to-primary/20 transition-all duration-200">
+                {user.name.charAt(0).toUpperCase()}
+              </div>
+              <div className="flex-1 text-left min-w-0">
+                <h3 className="font-medium text-gray-900 dark:text-white truncate">{user.name}</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 truncate">@{user.username}</p>
+                <p className="text-sm text-gray-400 dark:text-gray-500 truncate">{user.email}</p>
+              </div>
+              <svg
+                className={`w-5 h-5 text-gray-300 dark:text-gray-600 transition-transform duration-200 ${
+                  expanded ? 'rotate-90' : ''
+                }`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+          </button>
+        </li>
+        {isMobileInline && expanded && (
+          <li id={`user-detail-${user.id}`} className="py-2 border-t border-gray-100 dark:border-gray-800">
+            <div className="animate-in slide-in-from-top-2 duration-200">
+              <Posts />
+              <CreatePostForm />
+            </div>
+          </li>
+        )}
+      </Fragment>
+    );
+  };
 
   return (
     <div className="space-y-4">
@@ -99,35 +168,7 @@ const UserList = () => {
         </div>
       ) : (
         <ul className="divide-y divide-gray-100 dark:divide-gray-800" role="list" aria-label="Lista de usuarios">
-          {filteredUsers.map((user) => (
-            <li key={user.id}>
-              <button
-                onClick={() => handleUserSelect(user)}
-                className="w-full px-4 py-3.5 text-left hover:bg-gray-50 dark:hover:bg-gray-800/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset transition-all duration-150 group active:bg-gray-100 dark:active:bg-gray-800"
-                aria-pressed={false}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-11 h-11 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 dark:from-primary/30 dark:to-primary/10 flex items-center justify-center text-primary font-semibold group-hover:from-primary/30 group-hover:to-primary/20 transition-all duration-200">
-                    {user.name.charAt(0).toUpperCase()}
-                  </div>
-                  <div className="flex-1 text-left min-w-0">
-                    <h3 className="font-medium text-gray-900 dark:text-white truncate">{user.name}</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 truncate">@{user.username}</p>
-                    <p className="text-sm text-gray-400 dark:text-gray-500 truncate">{user.email}</p>
-                  </div>
-                  <svg
-                    className="w-5 h-5 text-gray-300 dark:text-gray-600 group-hover:text-primary transition-colors flex-shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </div>
-              </button>
-            </li>
-          ))}
+          {filteredUsers.map(renderUserItem)}
         </ul>
       )}
     </div>
