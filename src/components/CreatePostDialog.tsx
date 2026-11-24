@@ -1,4 +1,4 @@
-import { useState, type FormEvent, type ReactNode } from 'react';
+import { useState, type FormEvent, useEffect } from 'react';
 import { useAppState, useAppDispatch } from '../context/AppContext';
 import { api } from '../services/api';
 import type { CreatePostInput } from '../types/user';
@@ -6,7 +6,6 @@ import type { CreatePostInput } from '../types/user';
 interface CreatePostDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  children?: ReactNode;
 }
 
 const CreatePostDialog = ({ isOpen, onClose }: CreatePostDialogProps) => {
@@ -17,6 +16,17 @@ const CreatePostDialog = ({ isOpen, onClose }: CreatePostDialogProps) => {
   const [errors, setErrors] = useState<Partial<Record<keyof CreatePostInput, string>>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+
+  // Reset form when dialog opens
+  useEffect(() => {
+    if (isOpen) {
+      setTitle('');
+      setBody('');
+      setErrors({});
+      setSubmitError(null);
+      setIsSubmitting(false);
+    }
+  }, [isOpen]);
 
   const validate = () => {
     const newErrors: Partial<Record<keyof CreatePostInput, string>> = {};
@@ -40,8 +50,6 @@ const CreatePostDialog = ({ isOpen, onClose }: CreatePostDialogProps) => {
         userId: selectedUser.id,
       });
       dispatch({ type: 'ADD_POST', payload: newPost });
-      setTitle('');
-      setBody('');
       onClose();
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'Error al crear la publicación');
