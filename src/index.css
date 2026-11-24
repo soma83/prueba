@@ -7,6 +7,8 @@
   --color-primary-border: #d8b4fe;
 }
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 html {
   color-scheme: light dark;
   -webkit-tap-highlight-color: transparent;

@@ -1,12 +1,10 @@
-import { AppProvider, useAppState } from './context/AppContext';
+import { AppProvider } from './context/AppContext';
 import Header from './components/Header';
 import UserList from './components/UserList';
 import Posts from './components/Posts';
 import CreatePostForm from './components/CreatePostForm';
 
 const AppContent = () => {
-  const { selectedUser, posts } = useAppState();
-
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       <a
@@ -17,7 +15,8 @@ const AppContent = () => {
       </a>
       <Header />
       <main id="main-content" className="max-w-7xl mx-auto px-4 py-6">
-        <div className="grid lg:grid-cols-3 gap-6">
+        {/* Desktop: Sidebar layout (lg+) */}
+        <div className="hidden lg:grid lg:grid-cols-3 lg:gap-6">
           <section className="lg:col-span-1" aria-labelledby="users-heading">
             <h2 id="users-heading" className="text-lg font-semibold text-gray-900 dark:text-white mb-4 text-balance">
               Usuarios
@@ -33,19 +32,26 @@ const AppContent = () => {
                 <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
                 </svg>
-                {selectedUser ? `Publicaciones de ${selectedUser.name}` : 'Publicaciones'}
+                Publicaciones
               </h2>
-              {selectedUser && (
-                <span className="px-3 py-1 text-xs font-medium bg-primary/10 text-primary rounded-full border border-primary/20">
-                  {posts.length} {posts.length === 1 ? 'publicación' : 'publicaciones'}
-                </span>
-              )}
             </div>
             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-4">
-              <Posts selectedUserName={selectedUser?.name} />
+              <Posts />
             </div>
             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-4">
               <CreatePostForm />
+            </div>
+          </section>
+        </div>
+
+        {/* Mobile: Inline detail below selected user (< lg) */}
+        <div className="lg:hidden">
+          <section aria-labelledby="users-heading-mobile">
+            <h2 id="users-heading-mobile" className="text-lg font-semibold text-gray-900 dark:text-white mb-4 text-balance">
+              Usuarios
+            </h2>
+            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-4">
+              <UserList isMobileInline />
             </div>
           </section>
         </div>
