@@ -3,7 +3,7 @@ import { useAppState, useAppDispatch } from '../context/AppContext';
 import { useUsers } from '../hooks/useUsers';
 import { usePosts } from '../hooks/usePosts';
 import Posts from './Posts';
-import CreatePostForm from './CreatePostForm';
+import CreatePostDialog from './CreatePostDialog';
 import type { User } from '../types/user';
 
 interface UserListProps {
@@ -15,6 +15,7 @@ const UserList = ({ isMobileInline = false }: UserListProps) => {
   const { users, searchQuery, isUsersLoading, error, selectedUser } = useAppState();
   const dispatch = useAppDispatch();
   const [expandedUserId, setExpandedUserId] = useState<number | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
   useUsers();
   usePosts();
 
@@ -42,6 +43,14 @@ const UserList = ({ isMobileInline = false }: UserListProps) => {
       setExpandedUserId(user.id);
       dispatch({ type: 'SET_SELECTED_USER', payload: user });
     }
+  };
+
+  const openCreatePostDialog = () => {
+    setDialogOpen(true);
+  };
+
+  const closeCreatePostDialog = () => {
+    setDialogOpen(false);
   };
 
   const isExpanded = (userId: number) => expandedUserId === userId;
@@ -119,9 +128,18 @@ const UserList = ({ isMobileInline = false }: UserListProps) => {
         </li>
         {isMobileInline && expanded && (
           <li id={`user-detail-${user.id}`} className="py-2 border-t border-gray-100 dark:border-gray-800">
-            <div className="animate-in slide-in-from-top-2 duration-200">
+            <div className="animate-in slide-in-from-top-2 duration-200 space-y-4">
               <Posts />
-              <CreatePostForm />
+              <button
+                type="button"
+                onClick={openCreatePostDialog}
+                className="w-full px-4 py-2.5 bg-primary text-white font-medium rounded-lg hover:bg-primary-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-900 transition-colors flex items-center justify-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                Nueva publicación
+              </button>
             </div>
           </li>
         )}
@@ -171,6 +189,8 @@ const UserList = ({ isMobileInline = false }: UserListProps) => {
           {filteredUsers.map(renderUserItem)}
         </ul>
       )}
+
+      <CreatePostDialog isOpen={dialogOpen} onClose={closeCreatePostDialog} />
     </div>
   );
 };
