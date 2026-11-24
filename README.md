@@ -138,7 +138,7 @@ Este proyecto fue desarrollado asistido por IA (Claude / Nemotron) mediante:
 6. **Refactors**: Tema persistente, paginación reset, diálogo reset, search UX
 7. **Documentación**: README, comentarios, tipos estrictos
 
-La IA actuó como **pair programmer senior**: proponiendo código, corrigiendo errores de tipos/build/tests, aplicando buenas prácticas (accesibilidad, performance, DX) y iterando rápido ante requisitos cambiantes.
+La IA actuó proponiendo código, corrigiendo errores de tipos/build/tests, aplicando buenas prácticas (accesibilidad, performance, DX) y iterando rápido ante requisitos cambiantes.
 
 ## Nota final
 
