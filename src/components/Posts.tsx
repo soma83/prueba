@@ -63,7 +63,7 @@ const Posts = () => {
         ))}
       </ul>
 
-      {posts.length > 5 && <Pagination />}
+      {posts.length >= 5 && <Pagination />}
     </div>
   );
 };
